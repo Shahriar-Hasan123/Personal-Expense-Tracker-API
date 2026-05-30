@@ -13,4 +13,9 @@ func init() {
 	// Auth routes
 	beego.Router("/api/v1/auth/register", &controllers.AuthController{}, "post:Register")
 	beego.Router("/api/v1/auth/login", &controllers.AuthController{}, "post:Login")
+
+	// Expense routes — summary must be before :id to avoid route conflict
+	beego.Router("/api/v1/expenses/summary", &controllers.ExpenseController{}, "get:Summary")
+	beego.Router("/api/v1/expenses", &controllers.ExpenseController{}, "post:Create;get:List")
+	beego.Router("/api/v1/expenses/:id", &controllers.ExpenseController{}, "get:GetOne;put:Update;delete:Delete")
 }
