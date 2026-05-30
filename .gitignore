@@ -1,0 +1,31 @@
+# Compiled binary (bee run produces this)
+expense-tracker-api
+bin/
+
+# Runtime data files (auto-created by the app)
+data/
+
+# Go test cache
+*.test
+*.out
+coverage.out
+.coverprofile
+
+# Local environment overrides
+.env
+.env.*
+!.env.example
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Beego logs (if generated)
+logs/
+*.log
