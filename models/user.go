@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -30,7 +31,8 @@ func usersFilePath() string {
 
 // ensureFile creates the file and its parent directory if they don't exist.
 func ensureFile(path string) error {
-	if err := os.MkdirAll("data", os.ModePerm); err != nil {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		return err
 	}
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDONLY, 0644)

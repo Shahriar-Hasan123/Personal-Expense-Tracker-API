@@ -1,5 +1,6 @@
 # Compiled binary (bee run produces this)
 expense-tracker-api
+Personal-Expense-Tracker-API
 bin/
 
 # Runtime data files (auto-created by the app)
