@@ -104,6 +104,68 @@ func validateExpenseInput(input *expenseInput) string {
 	return ""
 }
 
+// parseListQueryParams reads, validates, and returns FilterOptions from the request.
+// Returns an error message string if any param is invalid.
+func (c *ExpenseController) parseListQueryParams() (models.FilterOptions, string) {
+	opts := models.FilterOptions{}
+
+	// category
+	category := c.GetString("category")
+	if category != "" && !models.IsValidCategory(category) {
+		return opts, "Invalid category"
+	}
+	opts.Category = category
+
+	// date_from
+	dateFrom := c.GetString("date_from")
+	if dateFrom != "" {
+		if _, err := time.Parse("2006-01-02", dateFrom); err != nil {
+			return opts, "date_from must be in YYYY-MM-DD format"
+		}
+	}
+	opts.DateFrom = dateFrom
+
+	// date_to
+	dateTo := c.GetString("date_to")
+	if dateTo != "" {
+		if _, err := time.Parse("2006-01-02", dateTo); err != nil {
+			return opts, "date_to must be in YYYY-MM-DD format"
+		}
+	}
+	opts.DateTo = dateTo
+
+	// date range logical check
+	if dateFrom != "" && dateTo != "" && dateFrom > dateTo {
+		return opts, "date_from cannot be after date_to"
+	}
+
+	// sort_by
+	sortBy := c.GetString("sort_by")
+	if sortBy != "" && sortBy != "amount" && sortBy != "expense_date" {
+		return opts, "sort_by must be 'amount' or 'expense_date'"
+	}
+	opts.SortBy = sortBy
+
+	// sort_order
+	sortOrder := c.GetString("sort_order")
+	if sortOrder != "" && sortOrder != "asc" && sortOrder != "desc" {
+		return opts, "sort_order must be 'asc' or 'desc'"
+	}
+	opts.SortOrder = sortOrder
+
+	// limit
+	limitStr := c.GetString("limit")
+	if limitStr != "" {
+		limit, err := strconv.Atoi(limitStr)
+		if err != nil || limit <= 0 {
+			return opts, "limit must be a positive integer"
+		}
+		opts.Limit = limit
+	}
+
+	return opts, ""
+}
+
 // Create handles POST /api/v1/expenses
 func (c *ExpenseController) Create() {
 	userID := c.authenticate()
@@ -143,9 +205,16 @@ func (c *ExpenseController) Create() {
 }
 
 // List handles GET /api/v1/expenses
+// Supports query params: category, date_from, date_to, sort_by, sort_order, limit
 func (c *ExpenseController) List() {
 	userID := c.authenticate()
 	if userID == -1 {
+		return
+	}
+
+	opts, errMsg := c.parseListQueryParams()
+	if errMsg != "" {
+		c.respondBadRequest(errMsg)
 		return
 	}
 
@@ -156,24 +225,13 @@ func (c *ExpenseController) List() {
 		return
 	}
 
-	// Apply limit query parameter
-	limitStr := c.GetString("limit")
-	if limitStr != "" {
-		limit, err := strconv.Atoi(limitStr)
-		if err != nil || limit <= 0 {
-			c.respondBadRequest("limit must be a positive integer")
-			return
-		}
-		if limit < len(expenses) {
-			expenses = expenses[:limit]
-		}
-	}
+	// Apply filters, sorting, and limit via model layer
+	filtered := models.ApplyFilters(expenses, opts)
 
 	// Build response slice — never return null for empty list
-	result := make([]expenseResponse, 0, len(expenses))
-	for _, e := range expenses {
-		e := e
-		result = append(result, toResponse(&e))
+	result := make([]expenseResponse, 0, len(filtered))
+	for i := range filtered {
+		result = append(result, toResponse(&filtered[i]))
 	}
 
 	c.respondSuccess("Expenses retrieved", result)
@@ -297,7 +355,55 @@ func (c *ExpenseController) Delete() {
 	c.respondSuccess("Expense deleted successfully", nil)
 }
 
-// Summary handles GET /api/v1/expenses/summary — implemented in Phase 3.
+// Summary handles GET /api/v1/expenses/summary
+// Required query params: date_from, date_to
 func (c *ExpenseController) Summary() {
-	c.respondJSON(501, false, "Not implemented yet", nil)
+	userID := c.authenticate()
+	if userID == -1 {
+		return
+	}
+
+	// Both date params are required for summary
+	dateFrom := strings.TrimSpace(c.GetString("date_from"))
+	dateTo := strings.TrimSpace(c.GetString("date_to"))
+
+	if dateFrom == "" {
+		c.respondBadRequest("date_from is required")
+		return
+	}
+	if dateTo == "" {
+		c.respondBadRequest("date_to is required")
+		return
+	}
+	if _, err := time.Parse("2006-01-02", dateFrom); err != nil {
+		c.respondBadRequest("date_from must be in YYYY-MM-DD format")
+		return
+	}
+	if _, err := time.Parse("2006-01-02", dateTo); err != nil {
+		c.respondBadRequest("date_to must be in YYYY-MM-DD format")
+		return
+	}
+	if dateFrom > dateTo {
+		c.respondBadRequest("date_from cannot be after date_to")
+		return
+	}
+
+	// Load all user expenses then filter to date range
+	expenses, err := models.GetExpensesByUserID(userID)
+	if err != nil {
+		logs.Error("Summary: GetExpensesByUserID error: %v", err)
+		c.respondInternalError("Failed to retrieve expenses")
+		return
+	}
+
+	opts := models.FilterOptions{
+		DateFrom: dateFrom,
+		DateTo:   dateTo,
+	}
+	filtered := models.ApplyFilters(expenses, opts)
+
+	summary := models.BuildSummary(filtered, dateFrom, dateTo)
+
+	logs.Info("Summary generated for UserID %d range: %s to %s", userID, dateFrom, dateTo)
+	c.respondSuccess("Summary generated", summary)
 }
