@@ -167,6 +167,18 @@ func (c *ExpenseController) parseListQueryParams() (models.FilterOptions, string
 }
 
 // Create handles POST /api/v1/expenses
+// @Title Create Expense
+// @Summary Create a new expense
+// @Description Creates a new expense for the authenticated user
+// @Tags expenses
+// @Accept json
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param body body expenseInput true "Expense details"
+// @Success 201 {object} map[string]interface{} "Expense created successfully"
+// @Failure 400 {object} map[string]interface{} "Validation error"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /expenses [post]
 func (c *ExpenseController) Create() {
 	userID := c.authenticate()
 	if userID == -1 {
@@ -205,7 +217,22 @@ func (c *ExpenseController) Create() {
 }
 
 // List handles GET /api/v1/expenses
-// Supports query params: category, date_from, date_to, sort_by, sort_order, limit
+// @Title List Expenses
+// @Summary List all expenses for the user
+// @Description Returns filtered, sorted, and paginated expenses
+// @Tags expenses
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param category query string false "Filter by category"
+// @Param date_from query string false "Filter from date (YYYY-MM-DD)"
+// @Param date_to query string false "Filter to date (YYYY-MM-DD)"
+// @Param sort_by query string false "Sort field: amount or expense_date"
+// @Param sort_order query string false "Sort order: asc or desc"
+// @Param limit query int false "Max number of results"
+// @Success 200 {object} map[string]interface{} "Expenses retrieved"
+// @Failure 400 {object} map[string]interface{} "Invalid query param"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /expenses [get]
 func (c *ExpenseController) List() {
 	userID := c.authenticate()
 	if userID == -1 {
@@ -238,6 +265,18 @@ func (c *ExpenseController) List() {
 }
 
 // GetOne handles GET /api/v1/expenses/:id
+// @Title Get Expense
+// @Summary Get a single expense by ID
+// @Description Returns one expense belonging to the authenticated user
+// @Tags expenses
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param id path int true "Expense ID"
+// @Success 200 {object} map[string]interface{} "Expense retrieved"
+// @Failure 400 {object} map[string]interface{} "Invalid ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 404 {object} map[string]interface{} "Expense not found"
+// @Router /expenses/{id} [get]
 func (c *ExpenseController) GetOne() {
 	userID := c.authenticate()
 	if userID == -1 {
@@ -265,6 +304,20 @@ func (c *ExpenseController) GetOne() {
 }
 
 // Update handles PUT /api/v1/expenses/:id
+// @Title Update Expense
+// @Summary Update an existing expense
+// @Description Updates an expense belonging to the authenticated user
+// @Tags expenses
+// @Accept json
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param id path int true "Expense ID"
+// @Param body body expenseInput true "Updated expense details"
+// @Success 200 {object} map[string]interface{} "Expense updated successfully"
+// @Failure 400 {object} map[string]interface{} "Validation error"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 404 {object} map[string]interface{} "Expense not found"
+// @Router /expenses/{id} [put]
 func (c *ExpenseController) Update() {
 	userID := c.authenticate()
 	if userID == -1 {
@@ -321,6 +374,18 @@ func (c *ExpenseController) Update() {
 }
 
 // Delete handles DELETE /api/v1/expenses/:id
+// @Title Delete Expense
+// @Summary Delete an expense
+// @Description Deletes an expense belonging to the authenticated user
+// @Tags expenses
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param id path int true "Expense ID"
+// @Success 200 {object} map[string]interface{} "Expense deleted successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 404 {object} map[string]interface{} "Expense not found"
+// @Router /expenses/{id} [delete]
 func (c *ExpenseController) Delete() {
 	userID := c.authenticate()
 	if userID == -1 {
@@ -356,7 +421,18 @@ func (c *ExpenseController) Delete() {
 }
 
 // Summary handles GET /api/v1/expenses/summary
-// Required query params: date_from, date_to
+// @Title Expense Summary
+// @Summary Get spending summary for a date range
+// @Description Returns total spending and per-category breakdown
+// @Tags expenses
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param date_from query string true "Start date (YYYY-MM-DD)"
+// @Param date_to query string true "End date (YYYY-MM-DD)"
+// @Success 200 {object} map[string]interface{} "Summary generated"
+// @Failure 400 {object} map[string]interface{} "Missing or invalid dates"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /expenses/summary [get]
 func (c *ExpenseController) Summary() {
 	userID := c.authenticate()
 	if userID == -1 {

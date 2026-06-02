@@ -3,6 +3,7 @@ expense-tracker-api
 Personal-Expense-Tracker-API
 bin/
 
+
 # Runtime data files (auto-created by the app)
 data/
 
@@ -12,10 +13,6 @@ data/
 coverage.out
 .coverprofile
 
-# Local environment overrides
-.env
-.env.*
-!.env.example
 
 # IDE / editor
 .vscode/
@@ -30,3 +27,4 @@ Thumbs.db
 # Beego logs (if generated)
 logs/
 *.log
+

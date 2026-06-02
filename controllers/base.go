@@ -1,3 +1,15 @@
+// Package controllers handles all HTTP request routing and response logic.
+//
+// @title           Personal Expense Tracker API
+// @version         1.0
+// @description     A REST API to manage personal expenses built with Go and Beego v2.
+//
+// @host            localhost:8080
+// @BasePath        /api/v1
+//
+// @in              header
+// @name            X-User-ID
+
 package controllers
 
 import (

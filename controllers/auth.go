@@ -34,6 +34,17 @@ func isValidEmail(email string) bool {
 }
 
 // Register handles POST /api/v1/auth/register
+// @Title Register
+// @Summary Register a new user
+// @Description Creates a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body registerInput true "User registration details"
+// @Success 201 {object} map[string]interface{} "User registered successfully"
+// @Failure 400 {object} map[string]interface{} "Validation error"
+// @Failure 409 {object} map[string]interface{} "Email already exists"
+// @Router /auth/register [post]
 func (c *AuthController) Register() {
 	var input registerInput
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &input); err != nil {
@@ -88,6 +99,17 @@ func (c *AuthController) Register() {
 }
 
 // Login handles POST /api/v1/auth/login
+// @Title Login
+// @Summary Login with email and password
+// @Description Authenticates a user and returns user info
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body loginInput true "Login credentials"
+// @Success 200 {object} map[string]interface{} "Login successful"
+// @Failure 400 {object} map[string]interface{} "Missing fields"
+// @Failure 401 {object} map[string]interface{} "Invalid credentials"
+// @Router /auth/login [post]
 func (c *AuthController) Login() {
 	var input loginInput
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &input); err != nil {

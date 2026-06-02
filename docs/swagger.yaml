@@ -1,0 +1,376 @@
+basePath: /api/v1
+definitions:
+  controllers.expenseInput:
+    properties:
+      amount:
+        type: number
+      category:
+        type: string
+      expense_date:
+        type: string
+      note:
+        type: string
+      title:
+        type: string
+    type: object
+  controllers.loginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  controllers.registerInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A REST API for managing personal expenses
+  title: Expense Tracker API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns user info
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.loginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing fields
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login with email and password
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account
+      parameters:
+      - description: User registration details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.registerInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Email already exists
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /expenses:
+    get:
+      description: Returns filtered, sorted, and paginated expenses
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Filter from date (YYYY-MM-DD)
+        in: query
+        name: date_from
+        type: string
+      - description: Filter to date (YYYY-MM-DD)
+        in: query
+        name: date_to
+        type: string
+      - description: 'Sort field: amount or expense_date'
+        in: query
+        name: sort_by
+        type: string
+      - description: 'Sort order: asc or desc'
+        in: query
+        name: sort_order
+        type: string
+      - description: Max number of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Expenses retrieved
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid query param
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all expenses for the user
+      tags:
+      - expenses
+    post:
+      consumes:
+      - application/json
+      description: Creates a new expense for the authenticated user
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Expense details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.expenseInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Expense created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new expense
+      tags:
+      - expenses
+  /expenses/{id}:
+    delete:
+      description: Deletes an expense belonging to the authenticated user
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Expense deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Expense not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete an expense
+      tags:
+      - expenses
+    get:
+      description: Returns one expense belonging to the authenticated user
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Expense retrieved
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Expense not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a single expense by ID
+      tags:
+      - expenses
+    put:
+      consumes:
+      - application/json
+      description: Updates an expense belonging to the authenticated user
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated expense details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.expenseInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Expense updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Expense not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an existing expense
+      tags:
+      - expenses
+  /expenses/summary:
+    get:
+      description: Returns total spending and per-category breakdown
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: date_from
+        required: true
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: date_to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Summary generated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing or invalid dates
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get spending summary for a date range
+      tags:
+      - expenses
+  /health:
+    get:
+      description: Returns server running status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Server is running
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Check if server is running
+      tags:
+      - health
+swagger: "2.0"
