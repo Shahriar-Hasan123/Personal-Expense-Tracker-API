@@ -34,7 +34,7 @@ The Personal Expense Tracker API is a production-ready Go application built with
 
 ### 1. Clone the repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/Shahriar-Hasan123/Personal-Expense-Tracker-API.git
 cd Personal-Expense-Tracker-API
 ```
 
