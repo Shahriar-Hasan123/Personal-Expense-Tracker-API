@@ -127,6 +127,10 @@ Run the complete test suite with coverage:
 ```bash
 go test ./... -v -cover
 ```
+Run the complete test suite with coverage (without verbose output):
+```bash
+go test ./... -cover
+```
 
 Run tests for a specific package:
 ```bash
