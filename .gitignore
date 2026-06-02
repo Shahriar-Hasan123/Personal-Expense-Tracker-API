@@ -24,6 +24,9 @@ coverage.out
 .DS_Store
 Thumbs.db
 
+# Local app configuration
+conf/app.conf
+
 # Beego logs (if generated)
 logs/
 *.log
